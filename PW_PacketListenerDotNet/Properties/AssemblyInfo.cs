@@ -1,0 +1,10 @@
+﻿using System.Diagnostics;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+[assembly: AssemblyTrademark("")]
+[assembly: CompilationRelaxations(8)]
+[assembly: ComVisible(false)]
+[assembly: Debuggable(DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints)]
+[assembly: Guid("7717235f-5e63-4ec1-8ba0-d45dc32407c0")]
+[assembly: RuntimeCompatibility(WrapNonExceptionThrows=true)]

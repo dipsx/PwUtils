@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net7.0-windows</TargetFramework>
+		<Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+		<OutputType>WinExe</OutputType>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<UseWindowsForms>true</UseWindowsForms>
+		<ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+		<Company>Microsoft</Company>
+		<Copyright>Copyright © Microsoft 2011</Copyright>
+		<FileVersion>1.0.0.0</FileVersion>
+		<Product>PW_PacketListener</Product>
+		<AssemblyTitle>PW_PacketListener</AssemblyTitle>
+		<AssemblyVersion>1.0.0.0</AssemblyVersion>
+	</PropertyGroup>
+	<ItemGroup>
+		<!-- копировать файлы ConfigExample\** в build дерикторю-->
+		<ContentWithTargetPath Include="ConfigExample\**">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<TargetPath>%(RecursiveDir)\%(Filename)%(Extension)</TargetPath>
+		</ContentWithTargetPath>
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\PWFrameWorkDotNet\PWFrameWorkDotNet.csproj" />
+	</ItemGroup>
+</Project>
