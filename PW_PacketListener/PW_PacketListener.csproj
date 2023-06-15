@@ -21,6 +21,6 @@
 		</ContentWithTargetPath>
 	</ItemGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\PWFrameWorkDotNet\PWFrameWorkDotNet.csproj" />
+	  <ProjectReference Include="..\PWFrameWork\PWFrameWork.csproj" />
 	</ItemGroup>
 </Project>

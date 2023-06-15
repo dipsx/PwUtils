@@ -5,9 +5,9 @@ VisualStudioVersion = 17.5.33627.172
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PwUtils", "PwUtils\PwUtils.csproj", "{2AFEFABF-189D-470C-93E7-3B68658600EE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PW_PacketListenerDotNet", "PW_PacketListenerDotNet\PW_PacketListenerDotNet.csproj", "{8A06A415-27A8-448B-ABF0-04F75E388113}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PW_PacketListener", "PW_PacketListener\PW_PacketListener.csproj", "{8A06A415-27A8-448B-ABF0-04F75E388113}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PWFrameWorkDotNet", "PWFrameWorkDotNet\PWFrameWorkDotNet.csproj", "{3B75F322-497B-4D9C-948E-1BFAF9FAF0B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PWFrameWork", "PWFrameWork\PWFrameWork.csproj", "{3B75F322-497B-4D9C-948E-1BFAF9FAF0B7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
