@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualBasic;
+using PWFrameWork;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,6 +9,10 @@ using System.Runtime.InteropServices;
 
 public class ASM
 {
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    static extern uint WaitForSingleObject(int hHandle, uint dwMilliseconds);
+
     [DllImport("kernel32.dll", EntryPoint = "CloseHandle")]
     public static extern int CloseHandle(int hObject);
 
@@ -1937,6 +1942,7 @@ byte[] buffer, int size, IntPtr lpNumberOfBytesWritten);
                 WriteProcessMemory(hwnd, addre, Asm, Asm.Length, 0);
                 //threadhwnd = CreateRemoteThread(hwnd, 0, 0, addre, 0, 0, ref pid);
                 threadhwnd = CreateRemoteThread(hwnd, 0, 0, addre, 0, 0, 0);
+                WaitForSingleObject(threadhwnd, 100);
                 //VirtualFreeEx(hwnd, addre, Asm.Length, MEM_RELEASE);
                 VirtualFreeEx(hwnd, addre, 0, MEM_RELEASE);
                 CloseHandle(threadhwnd);
