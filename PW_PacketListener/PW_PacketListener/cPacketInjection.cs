@@ -6,8 +6,8 @@ namespace PW_PacketListener;
 internal class cPacketInjection : IDisposable {
 
     private int _sendPacketOpcodeAddress;
-    private int _packetAddressLocation { get => _packetAddressLocation == 0 ? 0 : _packetAddressLocation + 16; }
-    private int _packetSizeAddress { get => _packetAddressLocation == 0 ? 0 : _packetAddressLocation + 21; }
+    private int _packetAddressLocation { get => _sendPacketOpcodeAddress == 0 ? 0 : _sendPacketOpcodeAddress + 16; }
+    private int _packetSizeAddress { get => _sendPacketOpcodeAddress == 0 ? 0 : _sendPacketOpcodeAddress + 21; }
 
 
     public async Task SendPacket(byte[] packetData) {

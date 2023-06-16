@@ -1,24 +1,15 @@
-using System;
+namespace PW_PacketListener;
 
-namespace PW_PacketListener
-{
-	internal class cPacketArea
-	{
-		public int iStart;
+internal class cPacketArea {
+    public int iStart;
 
-		public int iEnd;
+    public int iEnd;
 
-		public string sText;
+    public string sText;
 
-		public int iType;
+    public int iType;
 
-		public cPacketArea()
-		{
-		}
-
-		public override string ToString()
-		{
-			return this.sText;
-		}
-	}
+    public override string ToString() {
+        return this.sText;
+    }
 }

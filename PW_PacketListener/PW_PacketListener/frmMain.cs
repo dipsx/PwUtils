@@ -7,665 +7,782 @@ using System.Resources;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace PW_PacketListener
-{
-	public class frmMain : Form
-	{
-		private bool bInjectMode;
+namespace PW_PacketListener {
+    public class frmMain : Form {
+        private bool bInjectMode;
 
-		private cPacket pSendPacket = new cPacket();
+        private cPacket pSendPacket = new cPacket();
 
-		private cPacketInspector PacketInspector = new cPacketInspector();
+        private cPacketInspector PacketInspector = new cPacketInspector();
 
-		private cHookModule Hook = new cHookModule();
+        private cHookModule Hook = new cHookModule();
 
-		private myClientFinder ClientFinder;
+        private myClientFinder ClientFinder;
 
-		private IContainer components;
+        private IContainer components;
 
-		private System.Windows.Forms.Timer Timer;
+        private System.Windows.Forms.Timer Timer;
 
-		private Button cmdStop;
+        private Button cmdStop;
 
-		private ComboBox cmbPW;
+        private ComboBox cmbPW;
 
-		private Button cmdRefreshPW;
+        private Button cmdRefreshPW;
 
-		private TabControl tabControl1;
+        private TabControl tabControl1;
 
-		private TabPage tabPage1;
+        private TabPage tabPage1;
 
-		private TabPage tab_PacketProcessor;
+        private TabPage tab_PacketProcessor;
 
-		private ListBox lstPackets;
+        private ListBox lstPackets;
 
-		private TabPage tabPage4;
+        private TabPage tabPage4;
 
-		private Label label3;
+        private Label label3;
 
-		private Label label2;
+        private Label label2;
 
-		private Label label1;
+        private Label label1;
 
-		private Button cmdSendPacket;
+        private Button cmdSendPacket;
 
-		private Label label4;
+        private Label label4;
 
-		private TextBox txtSendPacket;
+        private TextBox txtSendPacket;
 
-		private Label label5;
+        private Label label5;
 
-		private Label lblSendPacket;
+        private Label lblSendPacket;
 
-		private Label label6;
+        private Label label6;
 
-		private GroupBox groupBox1;
+        private GroupBox groupBox1;
 
-		private Button cmdStart;
+        private Button cmdStart;
 
-		private GroupBox groupBox2;
+        private GroupBox groupBox2;
 
-		private Button cmdInjectOn;
+        private Button cmdInjectOn;
 
-		private Button cmdInjectOff;
+        private Button cmdInjectOff;
 
-		private TabPage tabPage5;
+        private TabPage tabPage5;
 
-		private Label label7;
+        private Label label7;
 
-		private ComboBox cmbKnownPackets;
+        private ComboBox cmbKnownPackets;
 
-		private WebBrowser webPacket;
+        private WebBrowser webPacket;
 
-		private Button SaveToBin;
+        private Button SaveToBin;
 
-		private Button SaveToTXT;
+        private Button SaveToTXT;
 
-		private System.Windows.Forms.ContextMenuStrip contextMenulstPackets;
+        private System.Windows.Forms.ContextMenuStrip contextMenulstPackets;
 
-		private ToolStripMenuItem menuPacketCopy;
+        private ToolStripMenuItem menuPacketCopy;
 
-		private ToolStripMenuItem menuPacketSend;
+        private ToolStripMenuItem menuPacketSend;
 
-		private Button cmdClearList;
+        private Button cmdClearList;
 
-		private System.Windows.Forms.Timer timPacketSend;
+        private System.Windows.Forms.Timer timPacketSend;
 
-		private GroupBox groupBox3;
+        private GroupBox groupBox3;
 
-		private Button cmdTimerSendPacketOff;
+        private Button cmdTimerSendPacketOff;
 
-		private Button cmdTimerSendPacketOn;
+        private Button cmdTimerSendPacketOn;
 
-		private Label label8;
+        private Label label8;
 
-		private TextBox txtSendPacketInterval;
+        private TextBox txtSendPacketInterval;
 
-		public frmMain()
-		{
-			this.InitializeComponent();
-		}
+        public frmMain() {
+            this.InitializeComponent();
+        }
 
-		private void cmbKnownPackets_SelectedIndexChanged(object sender, EventArgs e)
-		{
-			this.webPacket.DocumentText = ((cKnownPacket)this.cmbKnownPackets.SelectedItem).GetDescription();
-		}
+        private void cmbKnownPackets_SelectedIndexChanged(object sender, EventArgs e) {
+            this.webPacket.DocumentText = ((cKnownPacket)this.cmbKnownPackets.SelectedItem).GetDescription();
+        }
 
-		private void cmdClearList_Click(object sender, EventArgs e)
-		{
-			this.lstPackets.Items.Clear();
-		}
+        private void cmdClearList_Click(object sender, EventArgs e) {
+            this.lstPackets.Items.Clear();
+        }
 
-		private void cmdInjectOff_Click(object sender, EventArgs e)
-		{
-			this.cmdStop_Click(null, null);
-			MemoryManager.CloseProcess();
-			this.bInjectMode = false;
-			this.RefreshInterface();
-		}
+        private void cmdInjectOff_Click(object sender, EventArgs e) {
+            this.cmdStop_Click(null, null);
+            MemoryManager.CloseProcess();
+            this.bInjectMode = false;
+            this.RefreshInterface();
+        }
 
-		private void cmdInjectOn_Click(object sender, EventArgs e)
-		{
-			ClientWindow item = this.cmbPW.Items[this.cmbPW.SelectedIndex] as ClientWindow;
-			MemoryManager.OpenProcess(item.ProcessId);
-			this.bInjectMode = true;
-			this.RefreshInterface();
-		}
+        private void cmdInjectOn_Click(object sender, EventArgs e) {
+            ClientWindow item = this.cmbPW.Items[this.cmbPW.SelectedIndex] as ClientWindow;
+            MemoryManager.OpenProcess(item.ProcessId);
+            this.bInjectMode = true;
+            this.RefreshInterface();
+        }
 
-		private void cmdRefreshPW_Click(object sender, EventArgs e)
-		{
-			this.RefreshPW();
-		}
+        private void cmdRefreshPW_Click(object sender, EventArgs e) {
+            this.RefreshPW();
+        }
 
 
         cPacketInjection _cPacketInjection = new();
-        private async void cmdSendPacket_Click(object sender, EventArgs e)
-		{
-			if (this.pSendPacket.isEmpty())
-				return;
+        private async void cmdSendPacket_Click(object sender, EventArgs e) {
+            if (this.pSendPacket.isEmpty())
+                return;
 
-			await _cPacketInjection.SendPacket(this.pSendPacket.GetPacket());			
-		}
+            await _cPacketInjection.SendPacket(this.pSendPacket.GetPacket());
+        }
 
-		private void cmdStart_Click(object sender, EventArgs e)
-		{
-			//this.Hook.StartHook();
-			this.Hook.StartHook2();
+        private void cmdStart_Click(object sender, EventArgs e) {
+            this.Hook.StartHook();
             this.Timer.Enabled = true;
-			this.RefreshInterface();
-		}
+            this.RefreshInterface();
+        }
 
-		private void cmdStop_Click(object sender, EventArgs e)
-		{
-			if (this.Timer.Enabled)
-			{
-				this.Timer.Enabled = false;
-				this.Hook.StopHook();
-				this.RefreshInterface();
-			}
-		}
+        private void cmdStop_Click(object sender, EventArgs e) {
+            if (this.Timer.Enabled) {
+                this.Timer.Enabled = false;
+                this.Hook.StopHook();
+                this.RefreshInterface();
+            }
+        }
 
-		private void cmdTimerSendPacketOff_Click(object sender, EventArgs e)
-		{
-		}
+        private void cmdTimerSendPacketOff_Click(object sender, EventArgs e) {
+        }
 
-		private void cmdTimerSendPacketOn_Click(object sender, EventArgs e)
-		{
-		}
+        private void cmdTimerSendPacketOn_Click(object sender, EventArgs e) {
+        }
 
-		protected override void Dispose(bool disposing)
-		{
-			if (disposing && this.components != null)
-			{
-				this.components.Dispose();
-			}
-			base.Dispose(disposing);
-		}
+        protected override void Dispose(bool disposing) {
+            if (disposing && this.components != null) {
+                this.components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
 
-		private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
-		{
-			this.cmdStop_Click(null, null);
-			this.cmdInjectOff_Click(null, null);
-		}
+        private void frmMain_FormClosing(object sender, FormClosingEventArgs e) {
+            this.cmdStop_Click(null, null);
+            this.cmdInjectOff_Click(null, null);
+        }
 
-		private void frmMain_HelpButtonClicked(object sender, CancelEventArgs e)
-		{
-			MessageBox.Show("PW PacketListener. N00bSa1b0t. 2011-2013");
-			e.Cancel = true;
-		}
+        private void frmMain_HelpButtonClicked(object sender, CancelEventArgs e) {
+            MessageBox.Show("PW PacketListener. N00bSa1b0t. 2011-2013");
+            e.Cancel = true;
+        }
 
-		private void frmMain_Load(object sender, EventArgs e)
-		{
-			this.tabControl1.TabPages.Remove(this.tab_PacketProcessor);
-			cOptions.ReadConfigFile();
-			this.ClientFinder = new myClientFinder();
-			this.RefreshInterface();
-			this.RefreshPW();
-			this.cmbKnownPackets.Items.AddRange(this.PacketInspector.GetPackets());
-		}
+        private void frmMain_Load(object sender, EventArgs e) {
+            this.tabControl1.TabPages.Remove(this.tab_PacketProcessor);
+            cOptions.ReadConfigFile();
+            this.ClientFinder = new myClientFinder();
+            this.RefreshInterface();
+            this.RefreshPW();
+            this.cmbKnownPackets.Items.AddRange(this.PacketInspector.GetPackets());
+        }
 
-		private void InitializeComponent()
-		{
-			this.components = new System.ComponentModel.Container();
-			this.Timer = new System.Windows.Forms.Timer(this.components);
-			this.cmdStop = new Button();
-			this.cmbPW = new ComboBox();
-			this.cmdRefreshPW = new Button();
-			this.tabControl1 = new TabControl();
-			this.tabPage1 = new TabPage();
-			this.cmdClearList = new Button();
-			this.SaveToBin = new Button();
-			this.SaveToTXT = new Button();
-			this.lstPackets = new ListBox();
-			this.tab_PacketProcessor = new TabPage();
-			this.webPacket = new WebBrowser();
-			this.cmbKnownPackets = new ComboBox();
-			this.tabPage4 = new TabPage();
-			this.groupBox3 = new GroupBox();
-			this.cmdTimerSendPacketOff = new Button();
-			this.cmdTimerSendPacketOn = new Button();
-			this.label8 = new Label();
-			this.txtSendPacketInterval = new TextBox();
-			this.lblSendPacket = new Label();
-			this.label6 = new Label();
-			this.txtSendPacket = new TextBox();
-			this.label5 = new Label();
-			this.label4 = new Label();
-			this.label3 = new Label();
-			this.label2 = new Label();
-			this.label1 = new Label();
-			this.cmdSendPacket = new Button();
-			this.tabPage5 = new TabPage();
-			this.label7 = new Label();
-			this.contextMenulstPackets = new System.Windows.Forms.ContextMenuStrip(this.components);
-			this.menuPacketCopy = new ToolStripMenuItem();
-			this.menuPacketSend = new ToolStripMenuItem();
-			this.groupBox1 = new GroupBox();
-			this.cmdStart = new Button();
-			this.groupBox2 = new GroupBox();
-			this.cmdInjectOn = new Button();
-			this.cmdInjectOff = new Button();
-			this.timPacketSend = new System.Windows.Forms.Timer(this.components);
-			this.tabControl1.SuspendLayout();
-			this.tabPage1.SuspendLayout();
-			this.tab_PacketProcessor.SuspendLayout();
-			this.tabPage4.SuspendLayout();
-			this.groupBox3.SuspendLayout();
-			this.tabPage5.SuspendLayout();
-			this.contextMenulstPackets.SuspendLayout();
-			this.groupBox1.SuspendLayout();
-			this.groupBox2.SuspendLayout();
-			base.SuspendLayout();
-			this.Timer.Interval = 1;
-			this.Timer.Tick += new EventHandler(this.Timer_Tick);
-			this.cmdStop.Location = new Point(4, 69);
-			this.cmdStop.Name = "cmdStop";
-			this.cmdStop.Size = new System.Drawing.Size(189, 46);
-			this.cmdStop.TabIndex = 1;
-			this.cmdStop.Text = "Стоп";
-			this.cmdStop.UseVisualStyleBackColor = true;
-			this.cmdStop.Click += new EventHandler(this.cmdStop_Click);
-			this.cmbPW.DropDownStyle = ComboBoxStyle.DropDownList;
-			this.cmbPW.FormattingEnabled = true;
-			this.cmbPW.Location = new Point(12, 12);
-			this.cmbPW.Name = "cmbPW";
-			this.cmbPW.Size = new System.Drawing.Size(199, 21);
-			this.cmbPW.TabIndex = 2;
-			this.cmdRefreshPW.Location = new Point(12, 418);
-			this.cmdRefreshPW.Name = "cmdRefreshPW";
-			this.cmdRefreshPW.Size = new System.Drawing.Size(199, 23);
-			this.cmdRefreshPW.TabIndex = 3;
-			this.cmdRefreshPW.Text = "Поискать окна PW еще разок";
-			this.cmdRefreshPW.UseVisualStyleBackColor = true;
-			this.cmdRefreshPW.Click += new EventHandler(this.cmdRefreshPW_Click);
-			this.tabControl1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-			this.tabControl1.Controls.Add(this.tabPage1);
-			this.tabControl1.Controls.Add(this.tab_PacketProcessor);
-			this.tabControl1.Controls.Add(this.tabPage4);
-			this.tabControl1.Controls.Add(this.tabPage5);
-			this.tabControl1.Location = new Point(217, 12);
-			this.tabControl1.Name = "tabControl1";
-			this.tabControl1.SelectedIndex = 0;
-			this.tabControl1.Size = new System.Drawing.Size(652, 429);
-			this.tabControl1.TabIndex = 4;
-			this.tabPage1.Controls.Add(this.cmdClearList);
-			this.tabPage1.Controls.Add(this.SaveToBin);
-			this.tabPage1.Controls.Add(this.SaveToTXT);
-			this.tabPage1.Controls.Add(this.lstPackets);
-			this.tabPage1.Location = new Point(4, 22);
-			this.tabPage1.Name = "tabPage1";
-			this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-			this.tabPage1.Size = new System.Drawing.Size(644, 403);
-			this.tabPage1.TabIndex = 0;
-			this.tabPage1.Text = "Пакеты";
-			this.tabPage1.UseVisualStyleBackColor = true;
-			this.cmdClearList.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-			this.cmdClearList.Location = new Point(502, 374);
-			this.cmdClearList.Name = "cmdClearList";
-			this.cmdClearList.Size = new System.Drawing.Size(136, 23);
-			this.cmdClearList.TabIndex = 4;
-			this.cmdClearList.Text = "Очистить список";
-			this.cmdClearList.UseVisualStyleBackColor = true;
-			this.cmdClearList.Click += new EventHandler(this.cmdClearList_Click);
-			this.SaveToBin.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-			this.SaveToBin.Enabled = false;
-			this.SaveToBin.Location = new Point(360, 374);
-			this.SaveToBin.Name = "SaveToBin";
-			this.SaveToBin.Size = new System.Drawing.Size(136, 23);
-			this.SaveToBin.TabIndex = 3;
-			this.SaveToBin.Text = "Сохранить пакеты в bin";
-			this.SaveToBin.UseVisualStyleBackColor = true;
-			this.SaveToTXT.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-			this.SaveToTXT.Location = new Point(218, 374);
-			this.SaveToTXT.Name = "SaveToTXT";
-			this.SaveToTXT.Size = new System.Drawing.Size(136, 23);
-			this.SaveToTXT.TabIndex = 2;
-			this.SaveToTXT.Text = "Сохранить пакеты в txt";
-			this.SaveToTXT.UseVisualStyleBackColor = true;
-			this.SaveToTXT.Click += new EventHandler(this.SaveToTXT_Click);
-			this.lstPackets.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-			this.lstPackets.Font = new System.Drawing.Font("Lucida Console", 9.75f, FontStyle.Regular, GraphicsUnit.Point, 0);
-			this.lstPackets.FormattingEnabled = true;
-			this.lstPackets.Location = new Point(3, 3);
-			this.lstPackets.Name = "lstPackets";
-			this.lstPackets.Size = new System.Drawing.Size(638, 368);
-			this.lstPackets.TabIndex = 0;
-			this.lstPackets.SelectedIndexChanged += new EventHandler(this.lstPackets_SelectedIndexChanged);
-			this.lstPackets.MouseDown += new MouseEventHandler(this.lstPackets_MouseDown);
-			this.lstPackets.MouseUp += new MouseEventHandler(this.lstPackets_MouseUp);
-			this.tab_PacketProcessor.Controls.Add(this.webPacket);
-			this.tab_PacketProcessor.Controls.Add(this.cmbKnownPackets);
-			this.tab_PacketProcessor.Location = new Point(4, 22);
-			this.tab_PacketProcessor.Name = "tab_PacketProcessor";
-			this.tab_PacketProcessor.Size = new System.Drawing.Size(644, 403);
-			this.tab_PacketProcessor.TabIndex = 2;
-			this.tab_PacketProcessor.Text = "Распознавание пакетов";
-			this.tab_PacketProcessor.UseVisualStyleBackColor = true;
-			this.webPacket.Location = new Point(3, 33);
-			this.webPacket.MinimumSize = new System.Drawing.Size(20, 20);
-			this.webPacket.Name = "webPacket";
-			this.webPacket.ScriptErrorsSuppressed = true;
-			this.webPacket.Size = new System.Drawing.Size(638, 367);
-			this.webPacket.TabIndex = 1;
-			this.cmbKnownPackets.DropDownStyle = ComboBoxStyle.DropDownList;
-			this.cmbKnownPackets.FormattingEnabled = true;
-			this.cmbKnownPackets.Location = new Point(3, 6);
-			this.cmbKnownPackets.Name = "cmbKnownPackets";
-			this.cmbKnownPackets.Size = new System.Drawing.Size(273, 21);
-			this.cmbKnownPackets.TabIndex = 0;
-			this.cmbKnownPackets.SelectedIndexChanged += new EventHandler(this.cmbKnownPackets_SelectedIndexChanged);
-			this.tabPage4.Controls.Add(this.groupBox3);
-			this.tabPage4.Controls.Add(this.lblSendPacket);
-			this.tabPage4.Controls.Add(this.label6);
-			this.tabPage4.Controls.Add(this.txtSendPacket);
-			this.tabPage4.Controls.Add(this.label5);
-			this.tabPage4.Controls.Add(this.label4);
-			this.tabPage4.Controls.Add(this.label3);
-			this.tabPage4.Controls.Add(this.label2);
-			this.tabPage4.Controls.Add(this.label1);
-			this.tabPage4.Controls.Add(this.cmdSendPacket);
-			this.tabPage4.Location = new Point(4, 22);
-			this.tabPage4.Name = "tabPage4";
-			this.tabPage4.Size = new System.Drawing.Size(644, 403);
-			this.tabPage4.TabIndex = 3;
-			this.tabPage4.Text = "Отправка пакетов";
-			this.tabPage4.UseVisualStyleBackColor = true;
-			this.groupBox3.Controls.Add(this.cmdTimerSendPacketOff);
-			this.groupBox3.Controls.Add(this.cmdTimerSendPacketOn);
-			this.groupBox3.Controls.Add(this.label8);
-			this.groupBox3.Controls.Add(this.txtSendPacketInterval);
-			this.groupBox3.Location = new Point(349, 93);
-			this.groupBox3.Name = "groupBox3";
-			this.groupBox3.Size = new System.Drawing.Size(284, 79);
-			this.groupBox3.TabIndex = 9;
-			this.groupBox3.TabStop = false;
-			this.groupBox3.Text = "Повторяющаяся отправка";
-			this.groupBox3.Visible = false;
-			this.cmdTimerSendPacketOff.Enabled = false;
-			this.cmdTimerSendPacketOff.Location = new Point(96, 50);
-			this.cmdTimerSendPacketOff.Name = "cmdTimerSendPacketOff";
-			this.cmdTimerSendPacketOff.Size = new System.Drawing.Size(75, 23);
-			this.cmdTimerSendPacketOff.TabIndex = 3;
-			this.cmdTimerSendPacketOff.Text = "Выкл";
-			this.cmdTimerSendPacketOff.UseVisualStyleBackColor = true;
-			this.cmdTimerSendPacketOff.Visible = false;
-			this.cmdTimerSendPacketOff.Click += new EventHandler(this.cmdTimerSendPacketOff_Click);
-			this.cmdTimerSendPacketOn.Location = new Point(6, 50);
-			this.cmdTimerSendPacketOn.Name = "cmdTimerSendPacketOn";
-			this.cmdTimerSendPacketOn.Size = new System.Drawing.Size(75, 23);
-			this.cmdTimerSendPacketOn.TabIndex = 2;
-			this.cmdTimerSendPacketOn.Text = "Вкл";
-			this.cmdTimerSendPacketOn.UseVisualStyleBackColor = true;
-			this.cmdTimerSendPacketOn.Visible = false;
-			this.cmdTimerSendPacketOn.Click += new EventHandler(this.cmdTimerSendPacketOn_Click);
-			this.label8.AutoSize = true;
-			this.label8.Location = new Point(77, 20);
-			this.label8.Name = "label8";
-			this.label8.Size = new System.Drawing.Size(68, 13);
-			this.label8.TabIndex = 1;
-			this.label8.Text = "милисекунд";
-			this.label8.Visible = false;
-			this.txtSendPacketInterval.Location = new Point(6, 17);
-			this.txtSendPacketInterval.Name = "txtSendPacketInterval";
-			this.txtSendPacketInterval.Size = new System.Drawing.Size(65, 20);
-			this.txtSendPacketInterval.TabIndex = 0;
-			this.txtSendPacketInterval.Text = "200";
-			this.txtSendPacketInterval.Visible = false;
-			this.lblSendPacket.AutoSize = true;
-			this.lblSendPacket.Location = new Point(6, 302);
-			this.lblSendPacket.Name = "lblSendPacket";
-			this.lblSendPacket.Size = new System.Drawing.Size(0, 13);
-			this.lblSendPacket.TabIndex = 8;
-			this.label6.AutoSize = true;
-			this.label6.Location = new Point(6, 280);
-			this.label6.Name = "label6";
-			this.label6.Size = new System.Drawing.Size(242, 13);
-			this.label6.TabIndex = 7;
-			this.label6.Text = "Таким Ваш пакет увидела данная программа:";
-			this.txtSendPacket.Location = new Point(9, 217);
-			this.txtSendPacket.Name = "txtSendPacket";
-			this.txtSendPacket.Size = new System.Drawing.Size(632, 20);
-			this.txtSendPacket.TabIndex = 6;
-			this.txtSendPacket.TextChanged += new EventHandler(this.txtSendPacket_TextChanged);
-			this.label5.AutoSize = true;
-			this.label5.Location = new Point(6, 175);
-			this.label5.Name = "label5";
-			this.label5.Size = new System.Drawing.Size(435, 39);
-			this.label5.TabIndex = 5;
-			this.label5.Text = "Отправленный пакет также будет пойман программой, если включен режим ловли.\r\n\r\nВведите свой пакет в поле:\r\n";
-			this.label4.AutoSize = true;
-			this.label4.Location = new Point(6, 110);
-			this.label4.Name = "label4";
-			this.label4.Size = new System.Drawing.Size(34, 52);
-			this.label4.TabIndex = 4;
-			this.label4.Text = "55 00\r\n0800\r\n2e 00\r\n2f00";
-			this.label3.Location = new Point(6, 72);
-			this.label3.Name = "label3";
-			this.label3.Size = new System.Drawing.Size(638, 30);
-			this.label3.TabIndex = 3;
-			this.label3.Text = "Пакеты вводить в шестандцатеричном виде. Пробел между байтами можно оставлять, можно и убирать. Ниже пример правильных пакетов:";
-			this.label2.Location = new Point(3, 40);
-			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(638, 32);
-			this.label2.TabIndex = 2;
-			this.label2.Text = "Здесь Вы можете отправить свои собственные пакеты на сервер PW и посмотреть реакцию. В случае неверного пакета в лучшем случае может ничего не произойти. Но может вылететь игра. Так что будьте осторожны.";
-            this.label1.AutoSize = true;
-			this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25f, FontStyle.Bold, GraphicsUnit.Point, 204);
-			this.label1.Location = new Point(3, 6);
-			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(77, 13);
-			this.label1.TabIndex = 1;
-			this.label1.Text = "ВНИМАНИЕ";
-			this.cmdSendPacket.Location = new Point(9, 243);
-			this.cmdSendPacket.Name = "cmdSendPacket";
-			this.cmdSendPacket.Size = new System.Drawing.Size(122, 23);
-			this.cmdSendPacket.TabIndex = 0;
-			this.cmdSendPacket.Text = "Отправить";
-			this.cmdSendPacket.UseVisualStyleBackColor = true;
-			this.cmdSendPacket.Click += new EventHandler(this.cmdSendPacket_Click);
-			this.tabPage5.Controls.Add(this.label7);
-			this.tabPage5.Location = new Point(4, 22);
-			this.tabPage5.Name = "tabPage5";
-			this.tabPage5.Size = new System.Drawing.Size(644, 403);
-			this.tabPage5.TabIndex = 4;
-			this.tabPage5.Text = "Помощь";
-			this.tabPage5.UseVisualStyleBackColor = true;
-			this.label7.Dock = DockStyle.Fill;
-			this.label7.Location = new Point(0, 0);
-			this.label7.Name = "label7";
-			this.label7.Size = new System.Drawing.Size(644, 403);
-			this.label7.TabIndex = 0;
-			this.label7.Text = "1. Сначала выберите окно игры в списке в левом верхнем углу.\r\n2. Далее надо внедриться в процесс\r\n3. После этого можно либо отправлять пакеты в игру, либо запустить прослушку отправленных пакетов.";
-			ToolStripItem[] toolStripItemArray = new ToolStripItem[] { this.menuPacketCopy, this.menuPacketSend };
-            this.contextMenulstPackets.Items.AddRange(toolStripItemArray);
-			this.contextMenulstPackets.Name = "contextMenulstPackets";
-			this.contextMenulstPackets.Size = new System.Drawing.Size(140, 48);
-			this.menuPacketCopy.Name = "menuPacketCopy";
-			this.menuPacketCopy.Size = new System.Drawing.Size(139, 22);
-			this.menuPacketCopy.Text = "Копировать";
-			this.menuPacketCopy.Click += new EventHandler(this.menuPacketCopy_Click);
-			this.menuPacketSend.Name = "menuPacketSend";
-			this.menuPacketSend.Size = new System.Drawing.Size(139, 22);
-			this.menuPacketSend.Text = "Отправить";
-			this.menuPacketSend.Click += new EventHandler(this.menuPacketSend_Click);
-			this.groupBox1.Controls.Add(this.cmdStart);
-			this.groupBox1.Controls.Add(this.cmdStop);
-			this.groupBox1.Location = new Point(12, 176);
-			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(199, 124);
-			this.groupBox1.TabIndex = 5;
-			this.groupBox1.TabStop = false;
-			this.groupBox1.Text = "Захват пакетов";
-			this.cmdStart.Location = new Point(6, 17);
-			this.cmdStart.Name = "cmdStart";
-			this.cmdStart.Size = new System.Drawing.Size(187, 46);
-			this.cmdStart.TabIndex = 1;
-			this.cmdStart.Text = "Старт";
-			this.cmdStart.UseVisualStyleBackColor = true;
-			this.cmdStart.Click += new EventHandler(this.cmdStart_Click);
-			this.groupBox2.Controls.Add(this.cmdInjectOn);
-			this.groupBox2.Controls.Add(this.cmdInjectOff);
-			this.groupBox2.Location = new Point(12, 40);
-			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Size = new System.Drawing.Size(199, 124);
-			this.groupBox2.TabIndex = 6;
-			this.groupBox2.TabStop = false;
-			this.groupBox2.Text = "Внедрение в процесс";
-			this.cmdInjectOn.Location = new Point(6, 17);
-			this.cmdInjectOn.Name = "cmdInjectOn";
-			this.cmdInjectOn.Size = new System.Drawing.Size(187, 46);
-			this.cmdInjectOn.TabIndex = 1;
-			this.cmdInjectOn.Text = "Вкл";
-			this.cmdInjectOn.UseVisualStyleBackColor = true;
-			this.cmdInjectOn.Click += new EventHandler(this.cmdInjectOn_Click);
-			this.cmdInjectOff.Location = new Point(4, 69);
-			this.cmdInjectOff.Name = "cmdInjectOff";
-			this.cmdInjectOff.Size = new System.Drawing.Size(189, 46);
-			this.cmdInjectOff.TabIndex = 1;
-			this.cmdInjectOff.Text = "Выкл";
-			this.cmdInjectOff.UseVisualStyleBackColor = true;
-			this.cmdInjectOff.Click += new EventHandler(this.cmdInjectOff_Click);
-			this.timPacketSend.Tick += new EventHandler(this.timPacketSend_Tick);
-			base.AutoScaleDimensions = new SizeF(6f, 13f);
-			base.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			base.ClientSize = new System.Drawing.Size(881, 453);
-			base.Controls.Add(this.groupBox2);
-			base.Controls.Add(this.groupBox1);
-			base.Controls.Add(this.cmdRefreshPW);
-			base.Controls.Add(this.tabControl1);
-			base.Controls.Add(this.cmbPW);
-			base.HelpButton = true;
-			base.MaximizeBox = false;
-			base.MinimizeBox = false;
-			this.MinimumSize = new System.Drawing.Size(897, 491);
-			base.Name = "frmMain";
-			base.StartPosition = FormStartPosition.CenterScreen;
-			this.Text = "PWPacketListener";
-			base.HelpButtonClicked += new CancelEventHandler(this.frmMain_HelpButtonClicked);
-			base.FormClosing += new FormClosingEventHandler(this.frmMain_FormClosing);
-			base.Load += new EventHandler(this.frmMain_Load);
-			this.tabControl1.ResumeLayout(false);
-			this.tabPage1.ResumeLayout(false);
-			this.tab_PacketProcessor.ResumeLayout(false);
-			this.tabPage4.ResumeLayout(false);
-			this.tabPage4.PerformLayout();
-			this.groupBox3.ResumeLayout(false);
-			this.groupBox3.PerformLayout();
-			this.tabPage5.ResumeLayout(false);
-			this.contextMenulstPackets.ResumeLayout(false);
-			this.groupBox1.ResumeLayout(false);
-			this.groupBox2.ResumeLayout(false);
-			base.ResumeLayout(false);
-		}
+        private void InitializeComponent() {
+            components = new Container();
+            ComponentResourceManager resources = new ComponentResourceManager(typeof(frmMain));
+            Timer = new Timer(components);
+            cmdStop = new Button();
+            cmbPW = new ComboBox();
+            cmdRefreshPW = new Button();
+            tabControl1 = new TabControl();
+            tabPage1 = new TabPage();
+            cmdClearList = new Button();
+            SaveToBin = new Button();
+            SaveToTXT = new Button();
+            lstPackets = new ListBox();
+            tab_PacketProcessor = new TabPage();
+            webPacket = new WebBrowser();
+            cmbKnownPackets = new ComboBox();
+            tabPage4 = new TabPage();
+            groupBox3 = new GroupBox();
+            cmdTimerSendPacketOff = new Button();
+            cmdTimerSendPacketOn = new Button();
+            label8 = new Label();
+            txtSendPacketInterval = new TextBox();
+            lblSendPacket = new Label();
+            label6 = new Label();
+            txtSendPacket = new TextBox();
+            label5 = new Label();
+            label4 = new Label();
+            label3 = new Label();
+            label2 = new Label();
+            label1 = new Label();
+            cmdSendPacket = new Button();
+            tabPage5 = new TabPage();
+            label7 = new Label();
+            contextMenulstPackets = new ContextMenuStrip(components);
+            menuPacketCopy = new ToolStripMenuItem();
+            menuPacketSend = new ToolStripMenuItem();
+            groupBox1 = new GroupBox();
+            cmdStart = new Button();
+            groupBox2 = new GroupBox();
+            cmdInjectOn = new Button();
+            cmdInjectOff = new Button();
+            timPacketSend = new Timer(components);
+            tabControl1.SuspendLayout();
+            tabPage1.SuspendLayout();
+            tab_PacketProcessor.SuspendLayout();
+            tabPage4.SuspendLayout();
+            groupBox3.SuspendLayout();
+            tabPage5.SuspendLayout();
+            contextMenulstPackets.SuspendLayout();
+            groupBox1.SuspendLayout();
+            groupBox2.SuspendLayout();
+            SuspendLayout();
+            // 
+            // Timer
+            // 
+            Timer.Interval = 1;
+            Timer.Tick += Timer_Tick;
+            // 
+            // cmdStop
+            // 
+            cmdStop.Location = new Point(5, 80);
+            cmdStop.Margin = new Padding(4, 3, 4, 3);
+            cmdStop.Name = "cmdStop";
+            cmdStop.Size = new Size(220, 53);
+            cmdStop.TabIndex = 1;
+            cmdStop.Text = "Стоп";
+            cmdStop.UseVisualStyleBackColor = true;
+            cmdStop.Click += cmdStop_Click;
+            // 
+            // cmbPW
+            // 
+            cmbPW.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbPW.FormattingEnabled = true;
+            cmbPW.Location = new Point(14, 14);
+            cmbPW.Margin = new Padding(4, 3, 4, 3);
+            cmbPW.Name = "cmbPW";
+            cmbPW.Size = new Size(231, 23);
+            cmbPW.TabIndex = 2;
+            // 
+            // cmdRefreshPW
+            // 
+            cmdRefreshPW.Location = new Point(14, 482);
+            cmdRefreshPW.Margin = new Padding(4, 3, 4, 3);
+            cmdRefreshPW.Name = "cmdRefreshPW";
+            cmdRefreshPW.Size = new Size(232, 27);
+            cmdRefreshPW.TabIndex = 3;
+            cmdRefreshPW.Text = "Поискать окна PW еще разок";
+            cmdRefreshPW.UseVisualStyleBackColor = true;
+            cmdRefreshPW.Click += cmdRefreshPW_Click;
+            // 
+            // tabControl1
+            // 
+            tabControl1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            tabControl1.Controls.Add(tabPage1);
+            tabControl1.Controls.Add(tab_PacketProcessor);
+            tabControl1.Controls.Add(tabPage4);
+            tabControl1.Controls.Add(tabPage5);
+            tabControl1.Location = new Point(253, 14);
+            tabControl1.Margin = new Padding(4, 3, 4, 3);
+            tabControl1.Name = "tabControl1";
+            tabControl1.SelectedIndex = 0;
+            tabControl1.Size = new Size(761, 495);
+            tabControl1.TabIndex = 4;
+            // 
+            // tabPage1
+            // 
+            tabPage1.Controls.Add(cmdClearList);
+            tabPage1.Controls.Add(SaveToBin);
+            tabPage1.Controls.Add(SaveToTXT);
+            tabPage1.Controls.Add(lstPackets);
+            tabPage1.Location = new Point(4, 24);
+            tabPage1.Margin = new Padding(4, 3, 4, 3);
+            tabPage1.Name = "tabPage1";
+            tabPage1.Padding = new Padding(4, 3, 4, 3);
+            tabPage1.Size = new Size(753, 467);
+            tabPage1.TabIndex = 0;
+            tabPage1.Text = "Пакеты";
+            tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // cmdClearList
+            // 
+            cmdClearList.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            cmdClearList.Location = new Point(586, 432);
+            cmdClearList.Margin = new Padding(4, 3, 4, 3);
+            cmdClearList.Name = "cmdClearList";
+            cmdClearList.Size = new Size(159, 27);
+            cmdClearList.TabIndex = 4;
+            cmdClearList.Text = "Очистить список";
+            cmdClearList.UseVisualStyleBackColor = true;
+            cmdClearList.Click += cmdClearList_Click;
+            // 
+            // SaveToBin
+            // 
+            SaveToBin.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            SaveToBin.Enabled = false;
+            SaveToBin.Location = new Point(420, 432);
+            SaveToBin.Margin = new Padding(4, 3, 4, 3);
+            SaveToBin.Name = "SaveToBin";
+            SaveToBin.Size = new Size(159, 27);
+            SaveToBin.TabIndex = 3;
+            SaveToBin.Text = "Сохранить пакеты в bin";
+            SaveToBin.UseVisualStyleBackColor = true;
+            // 
+            // SaveToTXT
+            // 
+            SaveToTXT.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            SaveToTXT.Location = new Point(254, 432);
+            SaveToTXT.Margin = new Padding(4, 3, 4, 3);
+            SaveToTXT.Name = "SaveToTXT";
+            SaveToTXT.Size = new Size(159, 27);
+            SaveToTXT.TabIndex = 2;
+            SaveToTXT.Text = "Сохранить пакеты в txt";
+            SaveToTXT.UseVisualStyleBackColor = true;
+            SaveToTXT.Click += SaveToTXT_Click;
+            // 
+            // lstPackets
+            // 
+            lstPackets.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            lstPackets.Font = new Font("Lucida Console", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+            lstPackets.FormattingEnabled = true;
+            lstPackets.Location = new Point(4, 3);
+            lstPackets.Margin = new Padding(4, 3, 4, 3);
+            lstPackets.Name = "lstPackets";
+            lstPackets.Size = new Size(744, 420);
+            lstPackets.TabIndex = 0;
+            lstPackets.SelectedIndexChanged += lstPackets_SelectedIndexChanged;
+            lstPackets.MouseDown += lstPackets_MouseDown;
+            lstPackets.MouseUp += lstPackets_MouseUp;
+            // 
+            // tab_PacketProcessor
+            // 
+            tab_PacketProcessor.Controls.Add(webPacket);
+            tab_PacketProcessor.Controls.Add(cmbKnownPackets);
+            tab_PacketProcessor.Location = new Point(4, 24);
+            tab_PacketProcessor.Margin = new Padding(4, 3, 4, 3);
+            tab_PacketProcessor.Name = "tab_PacketProcessor";
+            tab_PacketProcessor.Size = new Size(753, 467);
+            tab_PacketProcessor.TabIndex = 2;
+            tab_PacketProcessor.Text = "Распознавание пакетов";
+            tab_PacketProcessor.UseVisualStyleBackColor = true;
+            // 
+            // webPacket
+            // 
+            webPacket.Location = new Point(4, 38);
+            webPacket.Margin = new Padding(4, 3, 4, 3);
+            webPacket.MinimumSize = new Size(23, 23);
+            webPacket.Name = "webPacket";
+            webPacket.ScriptErrorsSuppressed = true;
+            webPacket.Size = new Size(744, 423);
+            webPacket.TabIndex = 1;
+            // 
+            // cmbKnownPackets
+            // 
+            cmbKnownPackets.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbKnownPackets.FormattingEnabled = true;
+            cmbKnownPackets.Location = new Point(4, 7);
+            cmbKnownPackets.Margin = new Padding(4, 3, 4, 3);
+            cmbKnownPackets.Name = "cmbKnownPackets";
+            cmbKnownPackets.Size = new Size(318, 23);
+            cmbKnownPackets.TabIndex = 0;
+            cmbKnownPackets.SelectedIndexChanged += cmbKnownPackets_SelectedIndexChanged;
+            // 
+            // tabPage4
+            // 
+            tabPage4.Controls.Add(groupBox3);
+            tabPage4.Controls.Add(lblSendPacket);
+            tabPage4.Controls.Add(label6);
+            tabPage4.Controls.Add(txtSendPacket);
+            tabPage4.Controls.Add(label5);
+            tabPage4.Controls.Add(label4);
+            tabPage4.Controls.Add(label3);
+            tabPage4.Controls.Add(label2);
+            tabPage4.Controls.Add(label1);
+            tabPage4.Controls.Add(cmdSendPacket);
+            tabPage4.Location = new Point(4, 24);
+            tabPage4.Margin = new Padding(4, 3, 4, 3);
+            tabPage4.Name = "tabPage4";
+            tabPage4.Size = new Size(753, 467);
+            tabPage4.TabIndex = 3;
+            tabPage4.Text = "Отправка пакетов";
+            tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // groupBox3
+            // 
+            groupBox3.Controls.Add(cmdTimerSendPacketOff);
+            groupBox3.Controls.Add(cmdTimerSendPacketOn);
+            groupBox3.Controls.Add(label8);
+            groupBox3.Controls.Add(txtSendPacketInterval);
+            groupBox3.Location = new Point(407, 107);
+            groupBox3.Margin = new Padding(4, 3, 4, 3);
+            groupBox3.Name = "groupBox3";
+            groupBox3.Padding = new Padding(4, 3, 4, 3);
+            groupBox3.Size = new Size(331, 91);
+            groupBox3.TabIndex = 9;
+            groupBox3.TabStop = false;
+            groupBox3.Text = "Повторяющаяся отправка";
+            groupBox3.Visible = false;
+            // 
+            // cmdTimerSendPacketOff
+            // 
+            cmdTimerSendPacketOff.Enabled = false;
+            cmdTimerSendPacketOff.Location = new Point(112, 58);
+            cmdTimerSendPacketOff.Margin = new Padding(4, 3, 4, 3);
+            cmdTimerSendPacketOff.Name = "cmdTimerSendPacketOff";
+            cmdTimerSendPacketOff.Size = new Size(88, 27);
+            cmdTimerSendPacketOff.TabIndex = 3;
+            cmdTimerSendPacketOff.Text = "Выкл";
+            cmdTimerSendPacketOff.UseVisualStyleBackColor = true;
+            cmdTimerSendPacketOff.Visible = false;
+            cmdTimerSendPacketOff.Click += cmdTimerSendPacketOff_Click;
+            // 
+            // cmdTimerSendPacketOn
+            // 
+            cmdTimerSendPacketOn.Location = new Point(7, 58);
+            cmdTimerSendPacketOn.Margin = new Padding(4, 3, 4, 3);
+            cmdTimerSendPacketOn.Name = "cmdTimerSendPacketOn";
+            cmdTimerSendPacketOn.Size = new Size(88, 27);
+            cmdTimerSendPacketOn.TabIndex = 2;
+            cmdTimerSendPacketOn.Text = "Вкл";
+            cmdTimerSendPacketOn.UseVisualStyleBackColor = true;
+            cmdTimerSendPacketOn.Visible = false;
+            cmdTimerSendPacketOn.Click += cmdTimerSendPacketOn_Click;
+            // 
+            // label8
+            // 
+            label8.AutoSize = true;
+            label8.Location = new Point(90, 23);
+            label8.Margin = new Padding(4, 0, 4, 0);
+            label8.Name = "label8";
+            label8.Size = new Size(74, 15);
+            label8.TabIndex = 1;
+            label8.Text = "милисекунд";
+            label8.Visible = false;
+            // 
+            // txtSendPacketInterval
+            // 
+            txtSendPacketInterval.Location = new Point(7, 20);
+            txtSendPacketInterval.Margin = new Padding(4, 3, 4, 3);
+            txtSendPacketInterval.Name = "txtSendPacketInterval";
+            txtSendPacketInterval.Size = new Size(75, 23);
+            txtSendPacketInterval.TabIndex = 0;
+            txtSendPacketInterval.Text = "200";
+            txtSendPacketInterval.Visible = false;
+            // 
+            // lblSendPacket
+            // 
+            lblSendPacket.AutoSize = true;
+            lblSendPacket.Location = new Point(7, 348);
+            lblSendPacket.Margin = new Padding(4, 0, 4, 0);
+            lblSendPacket.Name = "lblSendPacket";
+            lblSendPacket.Size = new Size(0, 15);
+            lblSendPacket.TabIndex = 8;
+            // 
+            // label6
+            // 
+            label6.AutoSize = true;
+            label6.Location = new Point(7, 323);
+            label6.Margin = new Padding(4, 0, 4, 0);
+            label6.Name = "label6";
+            label6.Size = new Size(258, 15);
+            label6.TabIndex = 7;
+            label6.Text = "Таким Ваш пакет увидела данная программа:";
+            // 
+            // txtSendPacket
+            // 
+            txtSendPacket.Location = new Point(10, 250);
+            txtSendPacket.Margin = new Padding(4, 3, 4, 3);
+            txtSendPacket.Name = "txtSendPacket";
+            txtSendPacket.Size = new Size(737, 23);
+            txtSendPacket.TabIndex = 6;
+            txtSendPacket.TextChanged += txtSendPacket_TextChanged;
+            // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Location = new Point(7, 202);
+            label5.Margin = new Padding(4, 0, 4, 0);
+            label5.Name = "label5";
+            label5.Size = new Size(476, 45);
+            label5.TabIndex = 5;
+            label5.Text = "Отправленный пакет также будет пойман программой, если включен режим ловли.\r\n\r\nВведите свой пакет в поле:\r\n";
+            // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Location = new Point(7, 127);
+            label4.Margin = new Padding(4, 0, 4, 0);
+            label4.Name = "label4";
+            label4.Size = new Size(34, 60);
+            label4.TabIndex = 4;
+            label4.Text = "55 00\r\n0800\r\n2e 00\r\n2f00";
+            // 
+            // label3
+            // 
+            label3.Location = new Point(7, 83);
+            label3.Margin = new Padding(4, 0, 4, 0);
+            label3.Name = "label3";
+            label3.Size = new Size(744, 35);
+            label3.TabIndex = 3;
+            label3.Text = "Пакеты вводить в шестандцатеричном виде. Пробел между байтами можно оставлять, можно и убирать. Ниже пример правильных пакетов:";
+            // 
+            // label2
+            // 
+            label2.Location = new Point(4, 46);
+            label2.Margin = new Padding(4, 0, 4, 0);
+            label2.Name = "label2";
+            label2.Size = new Size(744, 37);
+            label2.TabIndex = 2;
+            label2.Text = resources.GetString("label2.Text");
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Bold, GraphicsUnit.Point);
+            label1.Location = new Point(4, 7);
+            label1.Margin = new Padding(4, 0, 4, 0);
+            label1.Name = "label1";
+            label1.Size = new Size(77, 13);
+            label1.TabIndex = 1;
+            label1.Text = "ВНИМАНИЕ";
+            // 
+            // cmdSendPacket
+            // 
+            cmdSendPacket.Location = new Point(10, 280);
+            cmdSendPacket.Margin = new Padding(4, 3, 4, 3);
+            cmdSendPacket.Name = "cmdSendPacket";
+            cmdSendPacket.Size = new Size(142, 27);
+            cmdSendPacket.TabIndex = 0;
+            cmdSendPacket.Text = "Отправить";
+            cmdSendPacket.UseVisualStyleBackColor = true;
+            cmdSendPacket.Click += cmdSendPacket_Click;
+            // 
+            // tabPage5
+            // 
+            tabPage5.Controls.Add(label7);
+            tabPage5.Location = new Point(4, 24);
+            tabPage5.Margin = new Padding(4, 3, 4, 3);
+            tabPage5.Name = "tabPage5";
+            tabPage5.Size = new Size(753, 467);
+            tabPage5.TabIndex = 4;
+            tabPage5.Text = "Помощь";
+            tabPage5.UseVisualStyleBackColor = true;
+            // 
+            // label7
+            // 
+            label7.Dock = DockStyle.Fill;
+            label7.Location = new Point(0, 0);
+            label7.Margin = new Padding(4, 0, 4, 0);
+            label7.Name = "label7";
+            label7.Size = new Size(753, 467);
+            label7.TabIndex = 0;
+            label7.Text = "1. Сначала выберите окно игры в списке в левом верхнем углу.\r\n2. Далее надо внедриться в процесс\r\n3. После этого можно либо отправлять пакеты в игру, либо запустить прослушку отправленных пакетов.";
+            // 
+            // contextMenulstPackets
+            // 
+            contextMenulstPackets.Items.AddRange(new ToolStripItem[] { menuPacketCopy, menuPacketSend });
+            contextMenulstPackets.Name = "contextMenulstPackets";
+            contextMenulstPackets.Size = new Size(140, 48);
+            // 
+            // menuPacketCopy
+            // 
+            menuPacketCopy.Name = "menuPacketCopy";
+            menuPacketCopy.Size = new Size(139, 22);
+            menuPacketCopy.Text = "Копировать";
+            menuPacketCopy.Click += menuPacketCopy_Click;
+            // 
+            // menuPacketSend
+            // 
+            menuPacketSend.Name = "menuPacketSend";
+            menuPacketSend.Size = new Size(139, 22);
+            menuPacketSend.Text = "Отправить";
+            menuPacketSend.Click += menuPacketSend_Click;
+            // 
+            // groupBox1
+            // 
+            groupBox1.Controls.Add(cmdStart);
+            groupBox1.Controls.Add(cmdStop);
+            groupBox1.Location = new Point(14, 203);
+            groupBox1.Margin = new Padding(4, 3, 4, 3);
+            groupBox1.Name = "groupBox1";
+            groupBox1.Padding = new Padding(4, 3, 4, 3);
+            groupBox1.Size = new Size(232, 143);
+            groupBox1.TabIndex = 5;
+            groupBox1.TabStop = false;
+            groupBox1.Text = "Захват пакетов";
+            // 
+            // cmdStart
+            // 
+            cmdStart.Location = new Point(7, 20);
+            cmdStart.Margin = new Padding(4, 3, 4, 3);
+            cmdStart.Name = "cmdStart";
+            cmdStart.Size = new Size(218, 53);
+            cmdStart.TabIndex = 1;
+            cmdStart.Text = "Старт";
+            cmdStart.UseVisualStyleBackColor = true;
+            cmdStart.Click += cmdStart_Click;
+            // 
+            // groupBox2
+            // 
+            groupBox2.Controls.Add(cmdInjectOn);
+            groupBox2.Controls.Add(cmdInjectOff);
+            groupBox2.Location = new Point(14, 46);
+            groupBox2.Margin = new Padding(4, 3, 4, 3);
+            groupBox2.Name = "groupBox2";
+            groupBox2.Padding = new Padding(4, 3, 4, 3);
+            groupBox2.Size = new Size(232, 143);
+            groupBox2.TabIndex = 6;
+            groupBox2.TabStop = false;
+            groupBox2.Text = "Внедрение в процесс";
+            // 
+            // cmdInjectOn
+            // 
+            cmdInjectOn.Location = new Point(7, 20);
+            cmdInjectOn.Margin = new Padding(4, 3, 4, 3);
+            cmdInjectOn.Name = "cmdInjectOn";
+            cmdInjectOn.Size = new Size(218, 53);
+            cmdInjectOn.TabIndex = 1;
+            cmdInjectOn.Text = "Вкл";
+            cmdInjectOn.UseVisualStyleBackColor = true;
+            cmdInjectOn.Click += cmdInjectOn_Click;
+            // 
+            // cmdInjectOff
+            // 
+            cmdInjectOff.Location = new Point(5, 80);
+            cmdInjectOff.Margin = new Padding(4, 3, 4, 3);
+            cmdInjectOff.Name = "cmdInjectOff";
+            cmdInjectOff.Size = new Size(220, 53);
+            cmdInjectOff.TabIndex = 1;
+            cmdInjectOff.Text = "Выкл";
+            cmdInjectOff.UseVisualStyleBackColor = true;
+            cmdInjectOff.Click += cmdInjectOff_Click;
+            // 
+            // timPacketSend
+            // 
+            timPacketSend.Tick += timPacketSend_Tick;
+            // 
+            // frmMain
+            // 
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(1028, 523);
+            Controls.Add(groupBox2);
+            Controls.Add(groupBox1);
+            Controls.Add(cmdRefreshPW);
+            Controls.Add(tabControl1);
+            Controls.Add(cmbPW);
+            HelpButton = true;
+            Margin = new Padding(4, 3, 4, 3);
+            MaximizeBox = false;
+            MinimizeBox = false;
+            MinimumSize = new Size(1044, 561);
+            Name = "frmMain";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "PWPacketListener";
+            HelpButtonClicked += frmMain_HelpButtonClicked;
+            FormClosing += frmMain_FormClosing;
+            Load += frmMain_Load;
+            tabControl1.ResumeLayout(false);
+            tabPage1.ResumeLayout(false);
+            tab_PacketProcessor.ResumeLayout(false);
+            tabPage4.ResumeLayout(false);
+            tabPage4.PerformLayout();
+            groupBox3.ResumeLayout(false);
+            groupBox3.PerformLayout();
+            tabPage5.ResumeLayout(false);
+            contextMenulstPackets.ResumeLayout(false);
+            groupBox1.ResumeLayout(false);
+            groupBox2.ResumeLayout(false);
+            ResumeLayout(false);
+        }
 
-		private void lstPackets_MouseDown(object sender, MouseEventArgs e)
-		{
-			if (e.Button != System.Windows.Forms.MouseButtons.Right)
-			{
-				return;
-			}
-			this.lstPackets.SelectedIndex = this.lstPackets.IndexFromPoint(new Point(e.X, e.Y));
-		}
+        private void lstPackets_MouseDown(object sender, MouseEventArgs e) {
+            if (e.Button != System.Windows.Forms.MouseButtons.Right) {
+                return;
+            }
+            this.lstPackets.SelectedIndex = this.lstPackets.IndexFromPoint(new Point(e.X, e.Y));
+        }
 
-		private void lstPackets_MouseUp(object sender, MouseEventArgs e)
-		{
-			if (e.Button != System.Windows.Forms.MouseButtons.Right)
-			{
-				return;
-			}
-			if (this.lstPackets.SelectedIndex == -1)
-			{
-				return;
-			}
-			this.contextMenulstPackets.Show(this.lstPackets, e.X, e.Y);
-		}
+        private void lstPackets_MouseUp(object sender, MouseEventArgs e) {
+            if (e.Button != System.Windows.Forms.MouseButtons.Right) {
+                return;
+            }
+            if (this.lstPackets.SelectedIndex == -1) {
+                return;
+            }
+            this.contextMenulstPackets.Show(this.lstPackets, e.X, e.Y);
+        }
 
-		private void lstPackets_SelectedIndexChanged(object sender, EventArgs e)
-		{
-		}
+        private void lstPackets_SelectedIndexChanged(object sender, EventArgs e) {
+        }
 
-		private void menuPacketCopy_Click(object sender, EventArgs e)
-		{
-			if (this.lstPackets.SelectedIndex > -1)
-			{
-				Clipboard.SetText(this.lstPackets.SelectedItem.ToString());
-			}
-		}
+        private void menuPacketCopy_Click(object sender, EventArgs e) {
+            if (this.lstPackets.SelectedIndex > -1) {
+                Clipboard.SetText(this.lstPackets.SelectedItem.ToString());
+            }
+        }
 
-		private async void menuPacketSend_Click(object sender, EventArgs e)
-		{
-			if (!this.bInjectMode || this.lstPackets.SelectedIndex < 0)
-			{
-				return;
-			}
-			cPacketInjection _cPacketInjection = new cPacketInjection();
-			await _cPacketInjection.SendPacket(((cPacket)this.lstPackets.SelectedItem).GetPacket());
-		}
+        private async void menuPacketSend_Click(object sender, EventArgs e) {
+            if (!this.bInjectMode || this.lstPackets.SelectedIndex < 0) {
+                return;
+            }
+            cPacketInjection _cPacketInjection = new cPacketInjection();
+            await _cPacketInjection.SendPacket(((cPacket)this.lstPackets.SelectedItem).GetPacket());
+        }
 
-		private void RefreshInterface()
-		{
-			this.cmdStart.Enabled = (!this.bInjectMode ? false : !this.Timer.Enabled);
-			this.cmdStop.Enabled = (!this.bInjectMode ? false : this.Timer.Enabled);
-			this.cmdRefreshPW.Enabled = (this.bInjectMode ? false : !this.Timer.Enabled);
-			this.cmbPW.Enabled = (this.bInjectMode ? false : !this.Timer.Enabled);
-			this.cmdInjectOn.Enabled = !this.bInjectMode;
-			this.cmdInjectOff.Enabled = this.bInjectMode;
-			this.cmdSendPacket.Enabled = this.bInjectMode;
-		}
+        private void RefreshInterface() {
+            this.cmdStart.Enabled = (!this.bInjectMode ? false : !this.Timer.Enabled);
+            this.cmdStop.Enabled = (!this.bInjectMode ? false : this.Timer.Enabled);
+            this.cmdRefreshPW.Enabled = (this.bInjectMode ? false : !this.Timer.Enabled);
+            this.cmbPW.Enabled = (this.bInjectMode ? false : !this.Timer.Enabled);
+            this.cmdInjectOn.Enabled = !this.bInjectMode;
+            this.cmdInjectOff.Enabled = this.bInjectMode;
+            this.cmdSendPacket.Enabled = this.bInjectMode;
+        }
 
-		private void RefreshPW()
-		{
-			this.cmbPW.Items.Clear();
-			this.cmbPW.Items.AddRange(this.ClientFinder.GetWindows());
-			if (this.cmbPW.Items.Count <= 0)
-			{
-				MessageBox.Show("Клиент PW не был найден. Запустите игру и нажмите на кнопку ниже.");
-				this.cmdInjectOn.Enabled = false;
-				return;
-			}
-			this.cmbPW.SelectedIndex = 0;
-			this.cmdInjectOn.Enabled = true;
-		}
+        private void RefreshPW() {
+            this.cmbPW.Items.Clear();
+            this.cmbPW.Items.AddRange(this.ClientFinder.GetWindows());
+            if (this.cmbPW.Items.Count <= 0) {
+                MessageBox.Show("Клиент PW не был найден. Запустите игру и нажмите на кнопку ниже.");
+                this.cmdInjectOn.Enabled = false;
+                return;
+            }
+            this.cmbPW.SelectedIndex = 0;
+            this.cmdInjectOn.Enabled = true;
+        }
 
-		private void SaveToTXT_Click(object sender, EventArgs e)
-		{
-			if (this.lstPackets.Items.Count == 0)
-			{
-				MessageBox.Show("Нет пакетов, нечего сохранять.");
-				return;
-			}
-			string str = "";
-			for (int i = 0; i < this.lstPackets.Items.Count; i++)
-			{
-				str = string.Concat(str, this.lstPackets.Items[i], "\r\n");
-			}
-			DateTime now = DateTime.Now;
-			string str1 = string.Concat("packets_", now.ToString(), ".txt");
-			str1 = str1.Replace(":", ".");
-			StreamWriter streamWriter = File.CreateText(str1);
-			streamWriter.Write(str);
-			streamWriter.Close();
-			MessageBox.Show(string.Concat("Пакеты сохранены в файл ", str1));
-		}
+        private void SaveToTXT_Click(object sender, EventArgs e) {
+            if (this.lstPackets.Items.Count == 0) {
+                MessageBox.Show("Нет пакетов, нечего сохранять.");
+                return;
+            }
+            string str = "";
+            for (int i = 0; i < this.lstPackets.Items.Count; i++) {
+                str = string.Concat(str, this.lstPackets.Items[i], "\r\n");
+            }
+            DateTime now = DateTime.Now;
+            string str1 = string.Concat("packets_", now.ToString(), ".txt");
+            str1 = str1.Replace(":", ".");
+            StreamWriter streamWriter = File.CreateText(str1);
+            streamWriter.Write(str);
+            streamWriter.Close();
+            MessageBox.Show(string.Concat("Пакеты сохранены в файл ", str1));
+        }
 
-		private async void Timer_Tick(object sender, EventArgs e)
-		{
-			byte[] numArray = this.Hook.TimerTick();
-			if (numArray != null && !cIgnore.IsPacketIgnored(numArray))
-			{
-				this.lstPackets.Items.Add(this.PacketInspector.ParseByteArray(numArray));
-			}
-			await Task.FromResult(0);
-		}
+        private async void Timer_Tick(object sender, EventArgs e) {
+            byte[] numArray = this.Hook.TimerTick();
+            if (numArray != null && !cIgnore.IsPacketIgnored(numArray)) {
+                this.lstPackets.Items.Add(this.PacketInspector.ParseByteArray(numArray));
+            }
+            await Task.FromResult(0);
+        }
 
-		private void timPacketSend_Tick(object sender, EventArgs e)
-		{
-		}
+        private void timPacketSend_Tick(object sender, EventArgs e) {
+        }
 
-		private void txtSendPacket_TextChanged(object sender, EventArgs e)
-		{
-			this.pSendPacket.ConvertFromString(this.txtSendPacket.Text);
-			this.lblSendPacket.Text = this.pSendPacket.ToString();
-		}
-	}
+        private void txtSendPacket_TextChanged(object sender, EventArgs e) {
+            this.pSendPacket.ConvertFromString(this.txtSendPacket.Text);
+            this.lblSendPacket.Text = this.pSendPacket.ToString();
+        }
+    }
 }
