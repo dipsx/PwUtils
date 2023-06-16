@@ -38,6 +38,8 @@ namespace PW_PacketListener
 			InjectHelper.FreeMemory(this.processHandle, this.offset_flag, 4);
 		}
         private void RestoreOriginalFunction2() {
+            var numArray = new byte[] { 0x90, 0x90 };
+            MemoryManager.WriteBytes(this.offset_MyFunc + 36, numArray);
             MemoryManager.WriteBytes(this.AddressAbsolutAfterPacketCall, this.OriginalBytes);
             Thread.Sleep(500);
             InjectHelper.FreeMemory(this.processHandle, this.offset_MyFunc);
