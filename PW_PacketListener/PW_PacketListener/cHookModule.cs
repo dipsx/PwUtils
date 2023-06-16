@@ -1,4 +1,4 @@
-using PWFrameWork;
+﻿using PWFrameWork;
 using System;
 using System.Threading;
 
@@ -10,7 +10,9 @@ namespace PW_PacketListener
 
 		private byte[] OriginalBytes;
 
-		private IntPtr processHandle;
+		private int AddressAbsolutAfterPacketCall;
+
+        private IntPtr processHandle;
 
 		private int offset_MyFunc;
 
@@ -35,8 +37,16 @@ namespace PW_PacketListener
 			InjectHelper.FreeMemory(this.processHandle, this.offset_data_size, 4);
 			InjectHelper.FreeMemory(this.processHandle, this.offset_flag, 4);
 		}
+        private void RestoreOriginalFunction2() {
+            MemoryManager.WriteBytes(this.AddressAbsolutAfterPacketCall, this.OriginalBytes);
+            Thread.Sleep(500);
+            InjectHelper.FreeMemory(this.processHandle, this.offset_MyFunc);
+            InjectHelper.FreeMemory(this.processHandle, this.offset_data_addr);
+            InjectHelper.FreeMemory(this.processHandle, this.offset_data_size);
+            InjectHelper.FreeMemory(this.processHandle, this.offset_flag);
+        }
 
-		public void StartHook()
+        public void StartHook()
 		{
 			this.processHandle = MemoryManager.OpenProcessHandle;
 			this.OriginalBytes = new byte[cOptions.NumBytesToCopy];
@@ -92,10 +102,57 @@ namespace PW_PacketListener
 			MemoryManager.WriteBytes(cOptions.PacketSendFunction, numArray3);
 		}
 
-		public void StopHook()
+
+        public void StartHook2() {
+            this.processHandle = MemoryManager.OpenProcessHandle;
+
+            var numArray = new byte[this._ListenFunction.Length];
+            this._ListenFunction.CopyTo(numArray, 0);
+
+            this.offset_MyFunc = InjectHelper.AllocateMemory(this.processHandle, numArray.Length + 100);
+            this.offset_data_addr = InjectHelper.AllocateMemory(this.processHandle, 4);
+            this.offset_data_size = InjectHelper.AllocateMemory(this.processHandle, 4);
+            this.offset_flag = InjectHelper.AllocateMemory(this.processHandle, 4);
+            MemoryManager.WriteBytes(this.offset_data_addr, new byte[4]);
+            MemoryManager.WriteBytes(this.offset_data_size, new byte[4]);
+            MemoryManager.WriteBytes(this.offset_flag, new byte[4]);
+            byte[] bytes = BitConverter.GetBytes(this.offset_data_addr);
+            byte[] bytes1 = BitConverter.GetBytes(this.offset_data_size);
+            byte[] numArray1 = BitConverter.GetBytes(this.offset_flag);
+            bytes.CopyTo(numArray, 5);
+            bytes1.CopyTo(numArray, 14);
+            numArray1.CopyTo(numArray, 20);
+            numArray1.CopyTo(numArray, 29);
+            MemoryManager.WriteBytes(this.offset_MyFunc, numArray);
+
+            // получить относительный адресс функции которую будем вызывать
+            var addrReletive = MemoryManager.ReadInt32(cOptions.PacketSendFunction + 1);
+            var addrAbsolute = cOptions.PacketSendFunction + 5 + addrReletive;
+            this.AddressAbsolutAfterPacketCall = addrAbsolute;
+            this.OriginalBytes = MemoryManager.ReadBytes(addrAbsolute, 9);
+
+            var _asm = new ASM();
+            _asm.AddBytes(this.OriginalBytes);
+            _asm.Mov_EAX(addrAbsolute + this.OriginalBytes.Length);
+            _asm.JMP_EAX();
+            bytes = _asm.GetBytesAndClean();
+            MemoryManager.WriteBytes(this.offset_MyFunc + numArray.Length, bytes);
+
+            _asm.Mov_EAX(this.offset_MyFunc);
+            _asm.JMP_EAX();
+            _asm.Nop();
+            _asm.Nop();
+            bytes = _asm.GetBytesAndClean();
+            MemoryManager.WriteBytes(addrAbsolute, bytes);
+        }
+
+        public void StopHook()
 		{
-			this.RestoreOriginalFunction();
-		}
+			//this.RestoreOriginalFunction();
+
+			this.RestoreOriginalFunction2();
+
+        }
 
 		public byte[] TimerTick()
 		{

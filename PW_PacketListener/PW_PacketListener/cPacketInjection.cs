@@ -1,5 +1,6 @@
 using PWFrameWork;
 using System;
+using System.Threading.Tasks;
 
 namespace PW_PacketListener
 {
@@ -19,33 +20,41 @@ namespace PW_PacketListener
 
 		private void LoadSendPacketOpcode(IntPtr processHandle)
 		{
-			this._sendPacketOpcodeAddress = InjectHelper.AllocateMemory(processHandle, (int)this._sendPacketOpcode.Length);
-			MemoryManager.WriteBytes(this._sendPacketOpcodeAddress, this._sendPacketOpcode);
-			byte[] bytes = BitConverter.GetBytes(cOptions.PacketSendFunction);
-			byte[] numArray = BitConverter.GetBytes(cOptions.BaseAddress);
-			MemoryManager.WriteBytes(this._sendPacketOpcodeAddress + 2, bytes);
-			MemoryManager.WriteBytes(this._sendPacketOpcodeAddress + 8, numArray);
+
+			var asm = new ASM();
+			asm.Pushad();
+			asm.Mov_EAX(cOptions.PacketSendFunction);
+			asm.Mov_ECX_DWORD_Ptr(cOptions.BaseAddress);
+			asm.Mov_ECX_DWORD_Ptr_ECX_Add(0x20);
+			asm.Mov_EDI(0x0);
+			asm.Push68(0x0);
+			asm.Push_EDI();
+			asm.Call_EAX();
+			asm.Popad();
+			asm.Ret();
+
+            this._sendPacketOpcodeAddress = asm.WriteAsmByHwnd((int)processHandle, 0);
+
 			this._packetAddressLocation = this._sendPacketOpcodeAddress + 16;
 			this._packetSizeAddress = this._sendPacketOpcodeAddress + 21;
 		}
 
-		public void SendPacket(byte[] packetData)
+		public async Task SendPacket(byte[] packetData)
 		{
 			IntPtr openProcessHandle = MemoryManager.OpenProcessHandle;
-			int num = InjectHelper.AllocateMemory(openProcessHandle, (int)packetData.Length);
-			MemoryManager.WriteBytes(num, packetData);
-			byte[] bytes = BitConverter.GetBytes(num);
+			int packetAdrPtr = InjectHelper.AllocateMemory(openProcessHandle, packetData.Length);
+			MemoryManager.WriteBytes(packetAdrPtr, packetData);
+
 			if (this._sendPacketOpcodeAddress == 0)
-			{
 				this.LoadSendPacketOpcode(openProcessHandle);
-			}
-			MemoryManager.WriteBytes(this._packetAddressLocation, bytes);
-			MemoryManager.WriteBytes(this._packetSizeAddress, BitConverter.GetBytes((int)packetData.Length));
-			IntPtr intPtr = InjectHelper.CreateRemoteThread(openProcessHandle, this._sendPacketOpcodeAddress);
-			WinApi.WaitForSingleObject(intPtr, 100);
-			WinApi.CloseHandle(intPtr);
-			InjectHelper.FreeMemory(openProcessHandle, num, (int)packetData.Length);
-			InjectHelper.FreeMemory(openProcessHandle, this._sendPacketOpcodeAddress, (int)this._sendPacketOpcode.Length);
+
+            MemoryManager.WriteBytes(this._packetAddressLocation, BitConverter.GetBytes(packetAdrPtr));
+			MemoryManager.WriteBytes(this._packetSizeAddress, BitConverter.GetBytes(packetData.Length));
+			IntPtr threadPtr = InjectHelper.CreateRemoteThread(openProcessHandle, this._sendPacketOpcodeAddress);
+			await Task.Run(() => WinApi.WaitForSingleObject(threadPtr, 5000));
+			WinApi.CloseHandle(threadPtr);
+			InjectHelper.FreeMemory(openProcessHandle, packetAdrPtr, packetData.Length);
+			//InjectHelper.FreeMemory(openProcessHandle, this._sendPacketOpcodeAddress, (int)this._sendPacketOpcode.Length);
 		}
 	}
 }

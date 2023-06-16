@@ -4,7 +4,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using ReadMemory.Common;
+using PWFrameWork.Consts;
 
 namespace PWFrameWork {
     public class InjectorActions {

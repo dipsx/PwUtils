@@ -16,11 +16,11 @@
 	<ItemGroup>
 		<!-- копировать файлы ConfigExample\** в build дерикторю-->
 		<ContentWithTargetPath Include="ConfigExample\**">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 			<TargetPath>%(RecursiveDir)\%(Filename)%(Extension)</TargetPath>
 		</ContentWithTargetPath>
 	</ItemGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\PWFrameWork\PWFrameWork.csproj" />
+		<ProjectReference Include="..\PWFrameWork\PWFrameWork.csproj" />
 	</ItemGroup>
 </Project>

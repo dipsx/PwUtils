@@ -40,7 +40,7 @@ namespace PW_PacketListener
 			this.HostPlayerName = cOptions.Name;
 		}
 
-		public new ClientWindow[] GetWindows()
+		public ClientWindow[] GetWindows()
 		{
 			List<ClientWindow> clientWindows = new List<ClientWindow>();
 			Process[] processes = Process.GetProcesses();

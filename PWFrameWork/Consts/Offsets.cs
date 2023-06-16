@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ReadMemory.Common {
+namespace PWFrameWork.Consts {
     public static class Offsets {
         public const int BA = 0xE444A4; // base address
         public const int GA = 0xE44C4C; // game address

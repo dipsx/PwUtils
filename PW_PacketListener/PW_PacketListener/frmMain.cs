@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Resources;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace PW_PacketListener
@@ -136,19 +137,21 @@ namespace PW_PacketListener
 			this.RefreshPW();
 		}
 
-		private void cmdSendPacket_Click(object sender, EventArgs e)
+
+        cPacketInjection _cPacketInjection = new();
+        private async void cmdSendPacket_Click(object sender, EventArgs e)
 		{
-			cPacketInjection _cPacketInjection = new cPacketInjection();
-			if (!this.pSendPacket.isEmpty())
-			{
-				_cPacketInjection.SendPacket(this.pSendPacket.GetPacket());
-			}
+			if (this.pSendPacket.isEmpty())
+				return;
+
+			await _cPacketInjection.SendPacket(this.pSendPacket.GetPacket());			
 		}
 
 		private void cmdStart_Click(object sender, EventArgs e)
 		{
-			this.Hook.StartHook();
-			this.Timer.Enabled = true;
+			//this.Hook.StartHook();
+			this.Hook.StartHook2();
+            this.Timer.Enabled = true;
 			this.RefreshInterface();
 		}
 
@@ -589,14 +592,14 @@ namespace PW_PacketListener
 			}
 		}
 
-		private void menuPacketSend_Click(object sender, EventArgs e)
+		private async void menuPacketSend_Click(object sender, EventArgs e)
 		{
 			if (!this.bInjectMode || this.lstPackets.SelectedIndex < 0)
 			{
 				return;
 			}
 			cPacketInjection _cPacketInjection = new cPacketInjection();
-			_cPacketInjection.SendPacket(((cPacket)this.lstPackets.SelectedItem).GetPacket());
+			await _cPacketInjection.SendPacket(((cPacket)this.lstPackets.SelectedItem).GetPacket());
 		}
 
 		private void RefreshInterface()
@@ -645,13 +648,14 @@ namespace PW_PacketListener
 			MessageBox.Show(string.Concat("Пакеты сохранены в файл ", str1));
 		}
 
-		private void Timer_Tick(object sender, EventArgs e)
+		private async void Timer_Tick(object sender, EventArgs e)
 		{
 			byte[] numArray = this.Hook.TimerTick();
 			if (numArray != null && !cIgnore.IsPacketIgnored(numArray))
 			{
 				this.lstPackets.Items.Add(this.PacketInspector.ParseByteArray(numArray));
 			}
+			await Task.FromResult(0);
 		}
 
 		private void timPacketSend_Tick(object sender, EventArgs e)

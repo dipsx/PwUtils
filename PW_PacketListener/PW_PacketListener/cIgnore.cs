@@ -90,7 +90,6 @@ namespace PW_PacketListener
 			{
 				((IDisposable)enumerator).Dispose();
 			}
-			return flag;
 		}
 	}
 }

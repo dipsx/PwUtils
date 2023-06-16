@@ -1925,17 +1925,14 @@ byte[] buffer, int size, IntPtr lpNumberOfBytesWritten);
 
     }
 
-    public void RunAsm(int pid, int address)
-    {
+    public void RunAsm(int pid, int address) {
         int hwnd = 0;
         int addre = 0;
         int threadhwnd = 0;
         byte[] Asm = this.AsmChangebytes(this.Asmcode);
-        if (pid != 0)
-        {
+        if (pid != 0) {
             hwnd = OpenProcess(PROCESS_ALL_ACCESS | PROCESS_CREATE_THREAD | PROCESS_VM_WRITE, 0, pid);
-            if (hwnd != 0)
-            {
+            if (hwnd != 0) {
                 addre = VirtualAllocEx(hwnd, address, Asm.Length, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
                 WriteProcessMemory(hwnd, addre, Asm, Asm.Length, 0);
                 //threadhwnd = CreateRemoteThread(hwnd, 0, 0, addre, 0, 0, ref pid);
@@ -1949,29 +1946,33 @@ byte[] buffer, int size, IntPtr lpNumberOfBytesWritten);
         this.Asmcode = "";
     }
 
-    public int WriteAsm(int pid, int address) {
-        int hwnd = 0;
-        //int addre = 0;
+    public int WriteAsmByHwnd(int hwnd, int address) {
+        if (hwnd == 0) throw new ArgumentException("hwnd = 0");
+
         byte[] Asm = this.AsmChangebytes(this.Asmcode);
-        if (pid != 0) {
-            hwnd = OpenProcess(PROCESS_ALL_ACCESS | PROCESS_CREATE_THREAD | PROCESS_VM_WRITE, 0, pid);
-            if (hwnd != 0) {
-                if(address == 0) {
-                    address = VirtualAllocEx(hwnd, 0, Asm.Length, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
-                }
-                //addre = VirtualAllocEx(hwnd, address, Asm.Length, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
-                WriteProcessMemory(hwnd, address, Asm, Asm.Length, 0);
-                //VirtualFreeEx(hwnd, addre, Asm.Length, MEM_RELEASE);
-                //VirtualFreeEx(hwnd, addre, 0, MEM_RELEASE);
-                CloseHandle(hwnd);
-            }
+        if (address == 0) {
+            address = VirtualAllocEx(hwnd, 0, Asm.Length, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
         }
+        WriteProcessMemory(hwnd, address, Asm, Asm.Length, 0);
+
         this.Asmcode = "";
 
         return address;
     }
 
-    public byte[] ToBytesAndClean() {
+    public int WriteAsm(int pid, int address) {
+        if (pid == 0) throw new ArgumentException("pid = 0");
+
+        var hwnd = OpenProcess(PROCESS_ALL_ACCESS | PROCESS_CREATE_THREAD | PROCESS_VM_WRITE, 0, pid);
+        try {
+            return WriteAsmByHwnd(hwnd, address);
+        } finally {
+            if (hwnd != 0)
+                CloseHandle(hwnd);
+        }
+    }
+
+    public byte[] GetBytesAndClean() {
         byte[] Asm = this.AsmChangebytes(this.Asmcode);
         this.Asmcode = "";
         return Asm;
