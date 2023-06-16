@@ -98,7 +98,7 @@ namespace PWFrameWork {
             _asm.Pushad();
             _asm.Mov_EDI(wid);
             _asm.Mov_EBX(0x0080DED0);
-            _asm.Mov_EBX(Offsets.BA);
+            _asm.Mov_EAX(Offsets.BA);
             _asm.Push_EDI();
             _asm.Mov_ECX_DWORD_Ptr_EAX_Add(0x20);
             _asm.Add_ECX(0xF4);
@@ -109,49 +109,5 @@ namespace PWFrameWork {
             _asm.RunAsm(_pid, 0);
         }
 
-        public void RunPacketListener() {
-            //18070026     | B8 B037066D              | mov eax,old-pwgame.6D0637B0                  |
-            //1807002B     | FFE0                     | jmp eax                                      |
-            //1807002D     | B8 459A8100              | mov eax,elementclient.819A45                 |
-            //18070032     | FFE0                     | jmp eax                                      |
-
-            MemoryManager.OpenProcess(_pid);
-            var addrReletive = MemoryManager.ReadInt32(Offsets.PacketCall + 1);
-            MemoryManager.CloseProcess();
-
-            var addrAbsolute = Offsets.PacketCall + 5 + addrReletive;
-
-            _asm.Push_EBP();
-            _asm.Mov_EBP_ESP();
-            _asm.SUB_ESP(0x98);
-
-            _asm.Mov_EAX(addrAbsolute + 9);
-            _asm.JMP_EAX();
-
-            var adr = _asm.WriteAsm(_pid, 0);
-
-            _asm.Mov_EAX(adr);
-            _asm.JMP_EAX();
-            _asm.Nop();
-            _asm.Nop();
-            var adr2 = _asm.WriteAsm(_pid, addrAbsolute);
-
-            //_asm.Mov_EAX(addrAbsolute);
-            //_asm.JMP_EAX();
-            //_asm.Mov_EAX(0x819A45);
-            //_asm.JMP_EAX();            
-            //_asm.Ret();
-
-            //var adr = _asm.WriteAsm(_pid, 0);
-
-
-
-            //_asm.JMP(adr - Offsets.PacketCall - 5);
-
-
-            //var adr2 = _asm.WriteAsm(_pid, Offsets.PacketCall);
-
-
-        }
     }
 }
